@@ -1,4 +1,4 @@
-import { type User, type InsertUser, users } from "@shared/schema";
+import { type User, type InsertUser, type HealthRecord, type InsertHealthRecord, users } from "@shared/schema";
 import { randomUUID } from "crypto";
 
 /**
@@ -9,6 +9,8 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  getHealthRecords(): Promise<HealthRecord[]>;
+  createHealthRecord(record: InsertHealthRecord): Promise<HealthRecord>;
 }
 
 /**
@@ -17,9 +19,11 @@ export interface IStorage {
  */
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
+  private healthRecords: Map<string, HealthRecord>;
 
   constructor() {
     this.users = new Map();
+    this.healthRecords = new Map();
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -36,6 +40,23 @@ export class MemStorage implements IStorage {
     const user: User = { ...insertUser, id };
     this.users.set(id, user);
     return user;
+  }
+
+  async getHealthRecords(): Promise<HealthRecord[]> {
+    return Array.from(this.healthRecords.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+  }
+
+  async createHealthRecord(insertRecord: InsertHealthRecord): Promise<HealthRecord> {
+    const id = randomUUID();
+    const record: HealthRecord = { 
+      ...insertRecord, 
+      id,
+      createdAt: new Date()
+    };
+    this.healthRecords.set(id, record);
+    return record;
   }
 }
 

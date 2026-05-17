@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { HeartPulse, FileText, CalendarClock, MessageCircleHeart, Sparkles } from "lucide-react";
+import { HeartPulse, FileText, CalendarClock, MessageCircleHeart, Sparkles, Save } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,11 +13,13 @@ import { HealthRecordCard } from "@/components/HealthRecordCard";
 import { DietPlanCard } from "@/components/DietPlanCard";
 import { ActionableStepsCard } from "@/components/ActionableStepsCard";
 import { SupportSchemesCard } from "@/components/SupportSchemesCard";
+import { HistorySidebar } from "@/components/HistorySidebar";
 import { calculateHealthResult, HealthResult, FormValues } from "@/lib/nutritionService";
 
 export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<HealthResult | null>(null);
+  const [lastFormData, setLastFormData] = useState<FormValues | null>(null);
 
   const onSubmit = (data: FormValues) => {
     setIsGenerating(true);
@@ -22,9 +27,44 @@ export default function Home() {
     setTimeout(() => {
       const healthResult = calculateHealthResult(data);
       setResult(healthResult);
+      setLastFormData(data);
       setIsGenerating(false);
     }, 2500);
   };
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const saveMutation = useMutation({
+    mutationFn: async (resultData: HealthResult) => {
+      if (!lastFormData) return;
+      
+      const payload = {
+        childName: resultData.name,
+        age: Number(lastFormData.age),
+        weight: Number(lastFormData.weight),
+        height: Number(lastFormData.height),
+        riskLevel: resultData.risk,
+        riskColor: resultData.riskColor,
+      };
+
+      await apiRequest("POST", "/api/records", payload);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/records"] });
+      toast({
+        title: "Assessment Saved",
+        description: "The health record has been saved to history.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Save Failed",
+        description: "Could not save the assessment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground pb-20">
@@ -35,8 +75,11 @@ export default function Home() {
             <HeartPulse className="h-8 w-8" />
             <span className="font-heading font-bold text-2xl tracking-tight">Poshan AI</span>
           </div>
-          <div className="text-sm font-medium text-muted-foreground bg-accent px-3 py-1 rounded-full border border-border">
-            NGO Support Mode
+          <div className="flex items-center gap-4">
+            <HistorySidebar />
+            <div className="text-sm font-medium text-muted-foreground bg-accent px-3 py-1 rounded-full border border-border hidden sm:block">
+              NGO Support Mode
+            </div>
           </div>
         </div>
       </header>
@@ -135,7 +178,16 @@ export default function Home() {
                   </Card>
                 </div>
                 
-                <div className="flex justify-end pt-4">
+                <div className="flex justify-end gap-3 pt-4">
+                   <Button 
+                     variant="outline" 
+                     className="gap-2 text-primary border-primary/20 hover:bg-primary/5" 
+                     onClick={() => saveMutation.mutate(result)}
+                     disabled={saveMutation.isPending}
+                   >
+                     <Save className="h-4 w-4" />
+                     {saveMutation.isPending ? "Saving..." : "Save Assessment"}
+                   </Button>
                    <Button variant="outline" className="gap-2 text-primary border-primary/20 hover:bg-primary/5" onClick={() => window.print()}>
                      <FileText className="h-4 w-4" />
                      Print Action Plan
