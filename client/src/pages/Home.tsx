@@ -14,6 +14,7 @@ import { DietPlanCard } from "@/components/DietPlanCard";
 import { ActionableStepsCard } from "@/components/ActionableStepsCard";
 import { SupportSchemesCard } from "@/components/SupportSchemesCard";
 import { HistorySidebar } from "@/components/HistorySidebar";
+import { Navigation } from "@/components/Navigation";
 import { calculateHealthResult, HealthResult, FormValues } from "@/lib/nutritionService";
 
 export default function Home() {
@@ -68,21 +69,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground pb-20">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-md border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-primary">
-            <HeartPulse className="h-8 w-8" />
-            <span className="font-heading font-bold text-2xl tracking-tight">Poshan AI</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <HistorySidebar />
-            <div className="text-sm font-medium text-muted-foreground bg-accent px-3 py-1 rounded-full border border-border hidden sm:block">
-              NGO Support Mode
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navigation />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="mb-10 max-w-2xl">
