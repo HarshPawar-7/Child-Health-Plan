@@ -1,6 +1,6 @@
 import { Utensils } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { DietMeal } from "@/lib/nutritionService";
+import { DietMeal } from "@shared/schema";
 
 interface DietPlanCardProps {
   dietPlan: DietMeal[];

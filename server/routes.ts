@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertHealthRecordSchema } from "@shared/schema";
+import { insertHealthRecordSchema, formSchema } from "@shared/schema";
+import { calculateHealthResult } from "./services/assessment";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -19,6 +20,16 @@ export async function registerRoutes(
       res.json(saved);
     } catch (e) {
       res.status(400).json({ error: "Invalid record data" });
+    }
+  });
+
+  app.post("/api/assessment", async (req, res) => {
+    try {
+      const data = formSchema.parse(req.body);
+      const result = calculateHealthResult(data);
+      res.json(result);
+    } catch (e) {
+      res.status(400).json({ error: "Invalid assessment data" });
     }
   });
 

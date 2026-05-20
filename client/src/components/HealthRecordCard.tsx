@@ -1,7 +1,7 @@
 import { AlertCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { HealthResult } from "@/lib/nutritionService";
+import { HealthResult } from "@shared/schema";
 
 interface HealthRecordCardProps {
   result: HealthResult;

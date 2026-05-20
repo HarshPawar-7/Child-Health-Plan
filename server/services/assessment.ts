@@ -1,34 +1,4 @@
-import { z } from "zod";
-
-export const formSchema = z.object({
-  name: z.string().min(2, "Name is required"),
-  age: z.coerce.number().min(0.1, "Age is required").max(18, "Age must be under 18"),
-  weight: z.coerce.number().min(1, "Weight is required").max(100, "Invalid weight"),
-  height: z.coerce.number().min(30, "Height is required").max(200, "Invalid height"),
-  meals: z.coerce.number().min(1, "Required").max(10, "Invalid meals"),
-  income: z.string().min(1, "Income level is required"),
-  vaccination: z.string().min(1, "Vaccination status is required"),
-});
-
-export type FormValues = z.infer<typeof formSchema>;
-
-export interface DietMeal {
-  time: string;
-  meal: string;
-}
-
-export interface HealthResult {
-  name: string;
-  risk: string;
-  riskColor: string;
-  riskInterpretation: string;
-  dietPlan: DietMeal[];
-  healthSteps: string[];
-  schemes: string[];
-  hygiene: string;
-  monitoring: string;
-  motivation: string;
-}
+import { FormValues, HealthResult } from "@shared/schema";
 
 const DIET_PLANS = {
   LOW_RISK: [

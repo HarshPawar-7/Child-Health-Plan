@@ -15,26 +15,39 @@ import { ActionableStepsCard } from "@/components/ActionableStepsCard";
 import { SupportSchemesCard } from "@/components/SupportSchemesCard";
 import { HistorySidebar } from "@/components/HistorySidebar";
 import { Navigation } from "@/components/Navigation";
-import { calculateHealthResult, HealthResult, FormValues } from "@/lib/nutritionService";
+import { HealthResult, FormValues } from "@shared/schema";
 
 export default function Home() {
-  const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState<HealthResult | null>(null);
   const [lastFormData, setLastFormData] = useState<FormValues | null>(null);
 
-  const onSubmit = (data: FormValues) => {
-    setIsGenerating(true);
-    // Simulate AI generation time
-    setTimeout(() => {
-      const healthResult = calculateHealthResult(data);
-      setResult(healthResult);
-      setLastFormData(data);
-      setIsGenerating(false);
-    }, 2500);
-  };
-
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const assessmentMutation = useMutation({
+    mutationFn: async (data: FormValues) => {
+      const res = await apiRequest("POST", "/api/assessment", data);
+      return await res.json();
+    },
+    onSuccess: (healthResult, data) => {
+      setResult(healthResult);
+      setLastFormData(data);
+    },
+    onError: () => {
+      toast({
+        title: "Assessment Failed",
+        description: "Could not generate assessment. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const onSubmit = (data: FormValues) => {
+    assessmentMutation.mutate(data);
+  };
+
+  const isGenerating = assessmentMutation.isPending;
+
 
   const saveMutation = useMutation({
     mutationFn: async (resultData: HealthResult) => {
