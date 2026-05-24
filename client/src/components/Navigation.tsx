@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { HeartPulse, LayoutDashboard, Calculator } from "lucide-react";
 import { HistorySidebar } from "./HistorySidebar";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Navigation() {
   const [location] = useLocation();
@@ -29,6 +30,7 @@ export function Navigation() {
         </nav>
 
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           <HistorySidebar />
           <div className="text-sm font-medium text-muted-foreground bg-accent px-3 py-1 rounded-full border border-border hidden sm:block">
             NGO Support Mode
